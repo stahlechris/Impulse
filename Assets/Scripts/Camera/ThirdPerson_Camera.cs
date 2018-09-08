@@ -34,15 +34,24 @@ public class ThirdPerson_Camera : MonoBehaviour
 	private float _startDistance;
 	private Vector3 _position = new Vector3 (768f, 3.5f, 903f);
 	private Vector3 _desiredPosition = new Vector3 (768f, 3.5f, 903f);
+	
+	private Transform myTransform;
 
 	private void Start ()
 	{
 		if (Instance == null)
+		{
 			Instance = this;
+		}
 
 		// If main camera is null, set as main camera
 		if (Camera.main == null)
+		{
 			tag = "MainCamera";
+		}
+		
+		//Cache our transform locally to avoid overhead.
+		myTransform = transform;
 
 		// Ensure our distance is between min and max (valid)
 		Distance = Mathf.Clamp (Distance, DistanceMin, DistanceMax);
@@ -117,7 +126,7 @@ public class ThirdPerson_Camera : MonoBehaviour
 
 		
 		// Draw the raycasts going through the near clip plane vertexes.
-		Debug.DrawLine (from, to + transform.forward * -GetComponent<Camera> ().nearClipPlane, Color.red);
+		Debug.DrawLine (from, to + myTransform.forward * -GetComponent<Camera> ().nearClipPlane, Color.red);
 		Debug.DrawLine (from, clipPlanePoints.UpperLeft, Color.red);
 		Debug.DrawLine (from, clipPlanePoints.UpperRight, Color.red);
 		Debug.DrawLine (from, clipPlanePoints.LowerLeft, Color.red);
@@ -136,7 +145,7 @@ public class ThirdPerson_Camera : MonoBehaviour
 		if (Physics.Linecast (from, clipPlanePoints.UpperRight, out hitInfo) && !hitInfo.collider.CompareTag("Player"))
 		if (hitInfo.distance < nearestDistance || nearestDistance == -1)
 			nearestDistance = hitInfo.distance;
-		if (Physics.Linecast (from, to + transform.forward * -GetComponent<Camera> ().nearClipPlane, out hitInfo) && !hitInfo.collider.CompareTag("Player"))
+		if (Physics.Linecast (from, to + myTransform.forward * -GetComponent<Camera> ().nearClipPlane, out hitInfo) && !hitInfo.collider.CompareTag("Player"))
 		if (hitInfo.distance < nearestDistance || nearestDistance == -1)
 			nearestDistance = hitInfo.distance;
 		
@@ -162,7 +171,7 @@ public class ThirdPerson_Camera : MonoBehaviour
 		var pos = CalculatePosition (MouseY, MouseX, PreOccludedDistance);
         
 		var clipPlanePoints = ThirdPerson_Helper.ClipPlaneAtNear (to);
-		/* Debug.DrawLine(this.transform.position, pos, Color.blue);
+		/* Debug.DrawLine(myTransform.position, pos, Color.blue);
         Debug.DrawLine(clipPlanePoints.upperLeft, pos, Color.blue);
         Debug.DrawLine(clipPlanePoints.upperRight, pos, Color.blue);
         Debug.DrawLine(clipPlanePoints.lowerLeft, pos, Color.blue);
@@ -194,9 +203,9 @@ public class ThirdPerson_Camera : MonoBehaviour
 		
 		_position = new Vector3 (posX, posY, posZ);
 		
-		transform.position = _position;
+		myTransform.position = _position;
 		
-		transform.LookAt (TargetLookTransform);
+		myTransform.LookAt (TargetLookTransform);
 	}
 
 	public void Reset ()
